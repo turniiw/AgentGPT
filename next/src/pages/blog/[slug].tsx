@@ -1,3 +1,4 @@
+import type { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import React from "react";
 import ReactMarkdown from "react-markdown";
@@ -7,15 +8,13 @@ import FooterLinks from "../../components/landing/FooterLinks";
 import FadeIn from "../../components/motions/FadeIn";
 import NavBar from "../../components/NavBar";
 import { getPostData, getSortedPostsData } from "../../lib/posts";
+import type { PostData, SlugData } from "../../lib/posts";
 
+type BlogPostPageProps = {
+  postData: PostData;
+};
 
-
-
-export default function BlogPost({
-  postData,
-}: {
-  postData: { title: string; date: string; content: string };
-}) {
+export default function BlogPost({ postData }: BlogPostPageProps) {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -24,7 +23,7 @@ export default function BlogPost({
 
   return (
     <div className="min-w-screen mx-6 grid min-h-screen place-items-center py-2 selection:bg-purple-700/25 lg:overflow-x-hidden lg:overflow-y-hidden">
-      <AppHead title="Reworkd Blog" />
+      <AppHead title={postData.title ?? "Reworkd Blog"} />
 
       <div className="flex h-full w-full max-w-[1440px] flex-col justify-between overflow-hidden">
         <NavBar />
@@ -43,8 +42,11 @@ export default function BlogPost({
               </main>
               <div className="mx-auto mb-8 max-w-2xl sm:mb-16">
                 <div className="text-white">
-                  <p>{postData.date}</p>
-                  <ReactMarkdown className="prose text-white">{postData.content}</ReactMarkdown>
+                  <p className="text-sm uppercase tracking-wide text-gray-300">{postData.date}</p>
+                  <h1 className="mt-2 text-3xl font-semibold text-white">{postData.title}</h1>
+                  <ReactMarkdown className="prose prose-invert mt-6 max-w-none text-white">
+                    {postData.content}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
@@ -61,12 +63,10 @@ export default function BlogPost({
   );
 }
 
-export async function getStaticPaths() {
-  // Fetch the list of blog post slugs or IDs dynamically
+export const getStaticPaths: GetStaticPaths = () => {
   const allPostsData = getSortedPostsData();
 
-  // Generate the paths based on the slugs
-  const paths = allPostsData.map(({ id }) => ({
+  const paths = allPostsData.map(({ id }: SlugData) => ({
     params: { slug: id },
   }));
 
@@ -74,14 +74,23 @@ export async function getStaticPaths() {
     paths,
     fallback: true,
   };
-}
+};
 
-export async function getStaticProps({ params }: { params: { slug: string } }) {
-  const postData = getPostData(params.slug);
+export const getStaticProps: GetStaticProps<BlogPostPageProps> = ({ params }) => {
+  const slugParam = params?.slug;
+  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
+
+  if (!slug) {
+    return {
+      notFound: true,
+    };
+  }
+
+  const postData = getPostData(slug);
 
   return {
     props: {
       postData,
     },
   };
-}
+};

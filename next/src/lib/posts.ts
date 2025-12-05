@@ -3,13 +3,31 @@ import path from "path";
 
 import matter from "gray-matter";
 
-// Define the types for the data
-export interface SlugData {
-  id: string;
-  date: string;
-
-  [key: string]: string;
+export interface PostCategory {
+  title: string;
+  href?: string;
 }
+
+export interface PostAuthor {
+  name: string;
+  role?: string;
+  href?: string;
+  imageUrl?: string;
+}
+
+export interface PostFrontmatter {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  date: string;
+  datetime?: string;
+  category?: PostCategory;
+  author?: PostAuthor;
+}
+
+export type SlugData = PostFrontmatter & {
+  id: string;
+};
 
 const postsDirectory = path.join(process.cwd(), "posts");
 
@@ -20,11 +38,11 @@ export function getSortedPostsData(): SlugData[] {
     const fullPath = path.join(postsDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const matterResult = matter(fileContents);
+    const frontmatter = matterResult.data as PostFrontmatter;
 
     return {
       id,
-      date: matterResult.data.date as string,
-      ...matterResult.data,
+      ...frontmatter,
     };
   });
 
@@ -37,21 +55,20 @@ export function getSortedPostsData(): SlugData[] {
   });
 }
 
-export interface PostData {
+export type PostData = PostFrontmatter & {
   slug: string;
   content: string;
-
-  [key: string]: string;
-}
+};
 
 export function getPostData(slug: string): PostData {
   const fullPath = path.join(postsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
+  const frontmatter = matterResult.data as PostFrontmatter;
 
   return {
     slug,
-    ...matterResult.data,
+    ...frontmatter,
     content: matterResult.content,
   };
 }

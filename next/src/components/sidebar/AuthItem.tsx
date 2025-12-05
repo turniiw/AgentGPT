@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import type { Session } from "next-auth";
 import { useTranslation } from "next-i18next";
@@ -36,10 +37,13 @@ const AuthItem: FC<{
       >
         {user && (
           <div className="relative">
-            <img
+            <Image
               className="h-6 w-6 rounded-full bg-neutral-800"
               src={get_avatar(user)}
               alt="user avatar"
+              width={24}
+              height={24}
+              unoptimized
             />
           </div>
         )}
@@ -64,7 +68,16 @@ const AuthItem: FC<{
           open={showDialog}
           setOpen={setShowDialog}
           title="My Account"
-          icon={<img className="h-20 w-20 rounded-md" src={get_avatar(user)} alt="" />}
+          icon={
+            <Image
+              className="h-20 w-20 rounded-md"
+              src={get_avatar(user)}
+              alt="user avatar enlarged"
+              width={80}
+              height={80}
+              unoptimized
+            />
+          }
           actions={
             <>
               <button

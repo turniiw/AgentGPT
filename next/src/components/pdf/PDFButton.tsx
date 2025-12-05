@@ -38,18 +38,25 @@ const PDFButton = ({ messages, name }: { messages: Message[]; name: string }) =>
   );
 };
 
+const translate = (key: string, options: { ns: string }) => {
+  return i18n?.t(key, options) ?? "";
+};
+
 const getTextSections = (messages: Message[]): string[] => {
   // Note "Thinking" messages have no `value` so they show up as new lines
   return messages
     .map((message) => {
       if (message.type == MESSAGE_TYPE_GOAL) {
-        return `${i18n?.t("LABEL_AGENT_GOAL", { ns: "indexPage" })}: ${message.value}`;
+        const goalLabel = translate("LABEL_AGENT_GOAL", { ns: "indexPage" });
+        return `${goalLabel}: ${message.value}`;
       }
       if (message.type == MESSAGE_TYPE_TASK) {
         if (message.info) {
-          return `${i18n?.t("EXECUTING", { ns: "common" })}: "${message.value}": ${message.info}`;
+          const executingLabel = translate("EXECUTING", { ns: "common" });
+          return `${executingLabel}: "${message.value}": ${message.info}`;
         } else {
-          return `${i18n?.t("ADDING_TASK", { ns: "common" })}: ${message.value}`;
+          const addingTaskLabel = translate("ADDING_TASK", { ns: "common" });
+          return `${addingTaskLabel}: ${message.value}`;
         }
       }
       return message.value;

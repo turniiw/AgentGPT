@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import Image from "next/image";
 import type { SyntheticEvent } from "react";
 import { z } from "zod";
 
@@ -36,7 +37,7 @@ const SourceLink = ({ link, index }: LinkInfo) => {
 
   return (
     <FadeIn>
-      <a href={link} target="_blank">
+      <a href={link} target="_blank" rel="noreferrer">
         <div className="group h-full space-y-2 rounded-lg border border-slate-8 bg-slate-3 p-2 transition-colors duration-300 hover:bg-slate-4">
           {linkMeta.isLoading ? (
             <div className="animate-pulse space-y-2">
@@ -51,10 +52,13 @@ const SourceLink = ({ link, index }: LinkInfo) => {
             <>
               <p className="line-clamp-2 text-xs">{linkMeta.data.title}</p>
               <div className="flex items-center gap-2 overflow-ellipsis">
-                <img
+                <Image
                   className="inline h-4 w-4"
-                  src={linkMeta.data.favicon || ""}
-                  alt="Logo"
+                  src={linkMeta.data.favicon || "/errorFavicon.ico"}
+                  alt="Link favicon"
+                  width={16}
+                  height={16}
+                  unoptimized
                   onError={addImageFallback}
                 />
                 <p className="line-clamp-1 overflow-ellipsis">{linkMeta.data.hostname}</p>

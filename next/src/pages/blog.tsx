@@ -1,14 +1,21 @@
-import React from "react";
+import type { GetStaticProps } from "next";
+import Image from "next/image";
 import { useRouter } from "next/router";
+import React from "react";
 
 import AppHead from "../components/AppHead";
 import FooterLinks from "../components/landing/FooterLinks";
 import FadeIn from "../components/motions/FadeIn";
 import NavBar from "../components/NavBar";
 import { getSortedPostsData } from "../lib/posts";
+import type { SlugData } from "../lib/posts";
 
 
-export default function BlogPage({ allPostsData }) { 
+type BlogPageProps = {
+  allPostsData: SlugData[];
+};
+
+export default function BlogPage({ allPostsData }: BlogPageProps) {
   const router = useRouter();
 
   return (
@@ -33,56 +40,70 @@ export default function BlogPage({ allPostsData }) {
               </main>
               <div className="flex-grow overflow-y-auto">
                 <div className="mx-auto mb-8 max-w-2xl cursor-pointer sm:mb-16">
-                  {allPostsData.map(({ id, title, date, imageUrl, category, author }) => (
-                    <article
-                      key={id}
-                      className="flex flex-col items-start justify-between rounded-lg p-3 transition-all duration-300 hover:bg-white/5"
-                      onClick={() => {
-                        router.push(`/blog/${id}`).catch(console.error);
-                      }}
-                    >
-                      <div className="relative w-full">
-                        <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
-                        <img
-                          src={imageUrl}
-                          alt=""
-                          className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                        />
-                      </div>
-                      <div className="max-w-xl">
-                        <div className="mt-4 flex items-center gap-x-2 text-xs sm:mt-6 sm:text-sm">
-                          <time dateTime={date} className="text-gray-300">
-                            {date}
-                          </time>
-                          <p className="relative z-10 rounded-full bg-gray-300 px-2 py-0.5 font-medium text-gray-600">
-                            {category.title}
-                          </p>
-                        </div>
-                        <div className="group relative">
-                          <h3 className="mt-2 text-lg font-semibold leading-6 text-white sm:mt-4">
-                            <span className="absolute inset-0" />
-                            {title}
-                          </h3>
-                        </div>
-                        <div className="relative mb-10 mt-4 flex items-center gap-x-2 sm:mt-6">
-                          <img
-                            src={author.imageUrl}
-                            alt=""
-                            className="h-8 w-8 rounded-full bg-gray-100 sm:h-10 sm:w-10"
+                  {allPostsData.map(({ id, title, date, imageUrl, category, author }) => {
+                    const heroImage = imageUrl ?? "/banner.png";
+                    const authorImage = author?.imageUrl ?? "/banner.png";
+                    const authorName = author?.name ?? "Reworkd Team";
+                    const authorRole = author?.role ?? "Editorial";
+
+                    return (
+                      <article
+                        key={id}
+                        className="flex flex-col items-start justify-between rounded-lg p-3 transition-all duration-300 hover:bg-white/5"
+                        onClick={() => {
+                          router.push(`/blog/${id}`).catch(console.error);
+                        }}
+                      >
+                        <div className="relative w-full">
+                          <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                          <Image
+                            src={heroImage}
+                            alt={title ?? "Blog post cover image"}
+                            width={1200}
+                            height={675}
+                            sizes="(min-width: 1024px) 640px, 100vw"
+                            className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                            unoptimized
                           />
-                          <div className="text-sm leading-6">
-                            <div className="font-semibold text-white">
-                              <p>
-                                <span className="absolute inset-0" />
-                                {author.name}
-                              </p>
+                        </div>
+                        <div className="max-w-xl">
+                          <div className="mt-4 flex items-center gap-x-2 text-xs sm:mt-6 sm:text-sm">
+                            <time dateTime={date} className="text-gray-300">
+                              {date}
+                            </time>
+                            <p className="relative z-10 rounded-full bg-gray-300 px-2 py-0.5 font-medium text-gray-600">
+                              {category?.title ?? "General"}
+                            </p>
+                          </div>
+                          <div className="group relative">
+                            <h3 className="mt-2 text-lg font-semibold leading-6 text-white sm:mt-4">
+                              <span className="absolute inset-0" />
+                              {title}
+                            </h3>
+                          </div>
+                          <div className="relative mb-10 mt-4 flex items-center gap-x-2 sm:mt-6">
+                            <Image
+                              src={authorImage}
+                              alt={`${authorName} avatar`}
+                              width={40}
+                              height={40}
+                              className="h-8 w-8 rounded-full bg-gray-100 sm:h-10 sm:w-10"
+                              unoptimized
+                            />
+                            <div className="text-sm leading-6">
+                              <div className="font-semibold text-white">
+                                <p>
+                                  <span className="absolute inset-0" />
+                                  {authorName}
+                                </p>
+                              </div>
+                              <p className="text-gray-300">{authorRole}</p>
                             </div>
-                            <p className="text-gray-300">{author.role}</p>
                           </div>
                         </div>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
               <footer className="flex flex-col items-center justify-center gap-2 pb-2 sm:gap-4 sm:pb-4 lg:flex-row">
@@ -99,11 +120,11 @@ export default function BlogPage({ allPostsData }) {
   );
 }
 
-export async function getStaticProps() {
+export const getStaticProps: GetStaticProps<BlogPageProps> = () => {
   const allPostsData = getSortedPostsData();
   return {
     props: {
       allPostsData,
     },
   };
-}
+};

@@ -8,7 +8,8 @@ export default function Globe(): JSX.Element {
 
   const size = 700;
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const canvasElement = canvasRef.current;
+    if (!canvasElement) return;
     let phi = 0;
 
     const globeSettings: COBEOptions = {
@@ -33,12 +34,10 @@ export default function Globe(): JSX.Element {
       },
     };
 
-    const globe = createGlobe(canvasRef.current, globeSettings);
+    const globe = createGlobe(canvasElement, globeSettings);
 
     return () => {
-      if (canvasRef.current && globe) {
-        globe.destroy();
-      }
+      globe.destroy();
     };
   }, []);
 

@@ -1,18 +1,19 @@
 import { motion, useAnimation } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import FadeIn from "../components/motions/FadeIn";
 import PrimaryButton from "../components/PrimaryButton";
 
-const welcome = () => {
+const WelcomePage = () => {
   const router = useRouter();
   const controls = useAnimation();
   const [buttonClicked, setButtonClicked] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    controls.start({
+    void controls.start({
       scale: 1,
       y: 0,
       transition: { type: "spring", stiffness: 80, damping: 15, mass: 1 },
@@ -21,17 +22,29 @@ const welcome = () => {
 
   useEffect(() => {
     if (buttonClicked) {
-      controls.start({
+      void controls.start({
         opacity: 0,
         transition: { duration: 0.75 },
       });
     }
   }, [buttonClicked, controls]);
 
+  useEffect(
+    () => () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    },
+    []
+  );
+
   const handleButtonClick = () => {
+    if (buttonClicked) {
+      return;
+    }
+
     setButtonClicked(true);
-    setInterval(() => {
-      // Wait 1 second and redirect
+    timeoutRef.current = setTimeout(() => {
       router.push("/").catch(console.error);
     }, 1000);
   };
@@ -72,4 +85,4 @@ const welcome = () => {
   );
 };
 
-export default welcome;
+export default WelcomePage;
